@@ -31,7 +31,7 @@ int main()
 }
 ```
 
-这里要注意的一点是，<u>线程也是**对象**，脱离了作用域，就会被析构</u>，对于被`detach`的线程，如果在起离开作用域之前没能把事情干完，就会发生一些意想不到的错误。对于这样的问题，我们可以定义全局线程对象。
+这里要注意的一点是，<u>线程也是**对象**，离开作用域时，会被析构</u>，对于被`detach`的线程，如果在起离开作用域之前没能把事情干完，就会发生一些意想不到的错误。对于这样的问题，我们可以定义全局线程对象。
 
 除此之外，线程可以被move，不可以被copy。（每个线程都由单独对应的id，不可被复制）
 
@@ -96,13 +96,13 @@ int main()
 }
 ```
 
-但请注意，不要直接将构造函数作为实参传入
+但请注意，不要直接将默认构造函数的调用作为实参传入
 
 ```c++
 thread trd(Foo()); // Don't do like this.
 ```
 
-这样做会被视为一个返回值为`thread`类型，接受`Foo`对象函数指针作为参数的**函数声明**。
+这样做会被视为一个返回值为`thread`类型，接受一个类型为`Foo (*)()`的函数指针作为参数的**函数声明**。
 
 如果要达到你的目的，你可以：
 
@@ -153,12 +153,19 @@ t.join();		// 无异常时调用join
 // 手写版本
 #include <iostream>
 #include <thread>
+#include <utility>
 
 class thread_guard
 {
     std::thread t;
 public:
-    explicit thread_guard(std::thread& t_) : t(std::move(t_)){}
+    explicit thread_guard(std::thread&& t_) : t(std::move(t_)){}
+    thread_guard& operator=(thread_guard&& x) {
+        if (t.joinable()) t.join();
+        t = std::move(x.t);
+        std::cout << __FUNCTION__ << " move assignment" << std::endl;
+        return *this;
+    }
     ~thread_guard()
     {
         if(t.joinable()) t.join();
@@ -170,7 +177,7 @@ public:
 
 struct func
 {
-    int &i; // 悬空的引用
+    int &i;
     func(int& i_):i(i_){}
     void operator ()()
     {
@@ -183,7 +190,9 @@ int main()
     int some_local_state = 0;
     std::thread trd{func(some_local_state)};
 
-    thread_guard g(trd); // 默认在析构的时候join，无需手动join。
+    thread_guard g(std::move(trd)); // 默认在析构的时候join，无需手动join。
+    thread_guard g2(std::thread([](){std::cout << "Make you happy" << std::endl;}));
+    g2 = std::move(g);
     // No join/detach: OK!
 }
 ```
@@ -197,7 +206,7 @@ int main()
 
 struct func
 {
-    int &i; // 悬空的引用
+    int &i;
     func(int& i_):i(i_){}
     void operator ()()
     {
@@ -214,8 +223,9 @@ int main()
     using unique_thread_ptr = std::unique_ptr<std::thread, std::function<void(std::thread*)>>;
     unique_thread_ptr trd_up(&trd, [](std::thread* pt) { 
          if(pt->joinable()) pt->join(); 
-         std::cout << "Joined!" << std::endl; });
-    // 不用额外delete，人家是遵循RAII写的。
+         std::cout << "Joined!" << std::endl;
+    });
+    // 不用额外join，unique_ptr保存了在析构时需要执行的函数对象
     // No join/detach: OK!
 }
 ```
@@ -245,6 +255,7 @@ t1 = std::move(t2);
 #include <thread>
 #include <vector>
 #include <functional>
+#include <algorithm>
 
 using namespace std;
 
@@ -258,9 +269,10 @@ int main()
     vector<thread> threads;
     for (int i = 0; i < 10; ++i)
     {
-        threads.emplace_back(thread(say_i, i));
+        threads.emplace_back(say_i, i);
     }
     for_each(threads.begin(), threads.end(), mem_fn(&thread::join));
+    cout << endl;
 }
 // 若要求顺序是0123...9的话，只需要emplace_back后立即join。
 /*
@@ -269,9 +281,10 @@ int main()
     vector<thread> threads;
     for (int i = 0; i < 10; ++i)
     {
-        threads.emplace_back(thread(say_id, i));
+        threads.emplace_back(say_id, i);
         threads[i].join();
     }
+    cout << endl;
 }
 */
 
@@ -377,3 +390,4 @@ int main()
 #### 其他
 
 > [这个repo](https://github.com/forhappy/Cplusplus-Concurrency-In-Practice)我大概瞄了一眼，感觉写的也不错。
+
