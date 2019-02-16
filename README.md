@@ -1,4 +1,4 @@
-# Faster Cpp
+# Faster_Morden_Cpp
 
 > A primary guidance to help coder write **std c++**(mainly) and **OpenCV Lib**  in an effective and efficient way.
 
