@@ -28,31 +28,31 @@
 
 ## 内容
 
-#### Fast basis
+#### [Fast basis](https://github.com/ganler/Faster_Morden_Cpp/blob/master/Fast%20basis.md)
 
 快速上车。
 
-#### IO operation
+#### [IO operation](https://github.com/ganler/Faster_Morden_Cpp/blob/master/IO%20operation.md)
 
 关于快速输入输出，以及iostream的无奈之处。
 
-#### Tricks for bit operation
+#### [Bit operation tricks](https://github.com/ganler/Faster_Morden_Cpp/blob/master/Bit%20operation%20tricks.md)
 
 简单的位运算的应用，以及告诫大家别没事位运算，位运算并不一定更快（尤其是在release模式下）。
 
-#### Useful  characteristics in modern c++
+#### [Useful  characteristics in modern c++](https://github.com/ganler/Faster_Morden_Cpp/blob/master/Useful%20%20characteristics%20in%20modern%20cpp.md)
 
 谈一谈编程的语义。
 
-#### Memory management
+#### [Memory management](https://github.com/ganler/Faster_Morden_Cpp/blob/master/Memory%20management.md)
 
 RAII & 智能指针。
 
-#### Cpp useful tools
+#### [Cpp useful tools](https://github.com/ganler/Faster_Morden_Cpp/blob/master/Cpp%20useful%20tools.md)
 
 茶余饭后学习使用STL中的小工具。
 
-#### Multi-thread
+#### [Multi-thread](https://github.com/ganler/Faster_Morden_Cpp/blob/master/Multi-thread.md)
 
 多线程嘛...不会自己封装那就用API咯，API都不会就直接OpenMP咯。
 
