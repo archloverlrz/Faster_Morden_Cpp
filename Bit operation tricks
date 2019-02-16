@@ -1,4 +1,4 @@
-# Tricks for bit operation
+# Bit operation tricks
 
 > 本篇虽然讲位运算的技巧，但我并不建议大家深刻&认真的学习这些技巧，而是把它当小说一样快速阅读。更重要的是，希望大家看清楚位运算这个东西到底有没有用，到底什么时候更有用。（btw，一切基于benchmark）
 
